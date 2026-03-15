@@ -1,118 +1,171 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CFO Dashboard - ChocoBox 2024</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        :root { --primary: #2c3e50; --secondary: #3498db; --danger: #e74c3c; --success: #27ae60; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--bg); margin: 0; padding: 20px; color: var(--primary); }
         .container { max-width: 1200px; margin: auto; }
-        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
-        .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .card h3 { margin-top: 0; color: #666; font-size: 0.9rem; text-transform: uppercase; }
-        .card .value { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
-        .card .delta { font-size: 0.9rem; color: #27ae60; }
-        .chart-container { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
-        .recommendations { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .risk { border-left: 5px solid #e74c3c; }
-        .growth { border-left: 5px solid #27ae60; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        
+        /* Стили калькулятора (Ползунок) */
+        .calculator-card { 
+            background: #fff; padding: 25px; border-radius: 12px; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); margin-bottom: 25px;
+            border: 2px solid var(--secondary);
+        }
+        .slider-container { margin: 20px 0; text-align: center; }
+        input[type=range] { width: 100%; cursor: pointer; height: 10px; }
+        
+        .results-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .res-box { padding: 15px; border-radius: 8px; text-align: center; background: #f8f9fa; border: 1px solid #ddd; }
+        .res-box.alert { background: #fdeaea; color: var(--danger); border: 1px solid var(--danger); }
+        
+        .card { background: #fff; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid #eee; }
         th { background: #f8f9fa; }
+        .negative { color: var(--danger); font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <div class="header">
-        <h1>Финансовый дашборд ChocoBox 2024</h1>
-        <div style="text-align: right;">
-            <strong>Статус:</strong> <span style="color: #27ae60;">Рост [cite: 31]</span><br>
-            <strong>Здоровье:</strong> Хорошее [cite: 30]
+    <h1>Финансовый анализ ChocoBox 2024</h1>
+
+    <div class="calculator-card">
+        <h2 style="margin:0;">🛑 Симулятор кризиса: Падение спроса</h2>
+        <p>Двигайте ползунок, чтобы увидеть влияние на деньги компании</p>
+        
+        <div class="slider-container">
+            <label>Снижение выручки: <strong id="dropLabel">0</strong>%</label>
+            <input type="range" id="crisisSlider" min="0" max="60" value="0">
+        </div>
+
+        <div class="results-grid">
+            <div class="res-box">
+                <div>Новая выручка (год)</div>
+                <div id="resRev" style="font-size: 1.5rem; font-weight: bold;">606,000</div>
+            </div>
+            <div id="resStatus" class="res-box">
+                <div>Остаток в декабре</div>
+                <div id="resBal" style="font-size: 1.5rem; font-weight: bold;">43,400</div>
+            </div>
         </div>
     </div>
 
-    <div class="stats-grid">
-        <div class="card">
-            <h3>Выручка (Год)</h3>
-            <div class="value">66 000</div>
-            <div class="delta">↑ +83% [cite: 3, 10]</div>
-        </div>
-        <div class="card">
-            <h3>Валовая прибыль</h3>
-            <div class="value">20 880</div>
-            <div class="delta">Пик в IV кв [cite: 7, 15]</div>
-        </div>
-        <div class="card risk">
-            <h3>Мин. остаток (Август)</h3>
-            <div class="value" style="color: #e74c3c;">13 816</div>
-            <div class="delta" style="color: #e74c3c;">Точка риска [cite: 17, 18]</div>
-        </div>
-        <div class="card">
-            <h3>Cash Flow (Ноябрь)</h3>
-            <div class="value">13 224</div>
-            <div class="delta">Макс. поток [cite: 7, 22]</div>
-        </div>
+    <div class="card">
+        <h3>График прогнозного баланса</h3>
+        <canvas id="crisisChart" height="100"></canvas>
     </div>
 
-    <div class="chart-container">
-        <h3>Динамика выручки и денежного баланса</h3>
-        <canvas id="businessChart"></canvas>
-    </div>
-
-    <div class="recommendations">
-        <div class="card risk">
-            <h3>Критический риск</h3>
-            <ul>
-                <li>Сильная волатильность баланса в течение года[cite: 5].</li>
-                <li>Отрицательный поток в декабре: -5 562.</li>
-                <li>Опасность кассового разрыва в августе[cite: 16].</li>
-            </ul>
-        </div>
-        <div class="card growth">
-            <h3>Драйверы роста</h3>
-            <ul>
-                <li>Сентябрь — начало сильного роста[cite: 14].</li>
-                <li>Октябрь-Декабрь — пиковые продажи[cite: 15].</li>
-                <li>Высокий потенциал масштабирования сезона[cite: 38].</li>
-            </ul>
-        </div>
+    <div class="card">
+        <h3>Детальные данные</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Месяц</th>
+                    <th>Выручка (факт)</th>
+                    <th>Вал. Прибыль</th>
+                    <th>Ден. поток</th>
+                    <th>Баланс</th>
+                </tr>
+            </thead>
+            <tbody id="dataTable"></tbody>
+        </table>
     </div>
 </div>
 
 <script>
-    const ctx = document.getElementById('businessChart').getContext('2d');
-    new Chart(ctx, {
+    // Данные из ваших отчетов
+    const originalData = [
+        {m: "Янв", r: 36000, gp: 12180, cf: 2740, b: 22740},
+        {m: "Фев", r: 36000, gp: 12180, cf: 240, b: 22980},
+        {m: "Мар", r: 42000, gp: 14340, cf: 2968, b: 25948},
+        {m: "Апр", r: 42000, gp: 14340, cf: 4468, b: 30416},
+        {m: "Май", r: 48000, gp: 16620, cf: 7292, b: 27708},
+        {m: "Июн", r: 48000, gp: 16620, cf: 6792, b: 34500},
+        {m: "Июл", r: 48000, gp: 16140, cf: 2908, b: 37408},
+        {m: "Авг", r: 48000, gp: 16140, cf: 1408, b: 13816},
+        {m: "Сен", r: 54000, gp: 17940, cf: 10698, b: 24514},
+        {m: "Окт", r: 66000, gp: 20880, cf: 16224, b: 45738},
+        {m: "Ноя", r: 66000, gp: 20880, cf: 13224, b: 58962},
+        {m: "Дек", r: 66000, gp: 20880, cf: -5562, b: 43400}
+    ];
+
+    const slider = document.getElementById('crisisSlider');
+    const dropLabel = document.getElementById('dropLabel');
+    const resRev = document.getElementById('resRev');
+    const resBal = document.getElementById('resBal');
+    const resStatus = document.getElementById('resStatus');
+    const tableBody = document.getElementById('dataTable');
+
+    // Отрисовка таблицы
+    tableBody.innerHTML = originalData.map(d => `
+        <tr>
+            <td>${d.m}</td>
+            <td>${d.r.toLocaleString()}</td>
+            <td>${d.gp.toLocaleString()}</td>
+            <td class="${d.cf < 0 ? 'negative' : ''}">${d.cf.toLocaleString()}</td>
+            <td>${d.b.toLocaleString()}</td>
+        </tr>
+    `).join('');
+
+    // Настройка графика
+    const ctx = document.getElementById('crisisChart').getContext('2d');
+    let chart = new Chart(ctx, {
         type: 'line',
         data: {
-            labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+            labels: originalData.map(d => d.m),
             datasets: [{
-                label: 'Выручка [cite: 7]',
-                data: [36000, 36000, 42000, 42000, 48000, 48000, 48000, 48000, 54000, 66000, 66000, 66000],
+                label: 'Прогноз остатка денег на счете',
+                data: originalData.map(d => d.b),
                 borderColor: '#3498db',
                 backgroundColor: 'rgba(52, 152, 219, 0.1)',
                 fill: true,
                 tension: 0.3
-            }, {
-                label: 'Денежный баланс [cite: 7]',
-                data: [22740, 22980, 25948, 30416, 27708, 34500, 37408, 13816, 24514, 45738, 58962, 43400],
-                borderColor: '#e67e22',
-                borderDash: [5, 5],
-                fill: false,
-                tension: 0.3
             }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { position: 'bottom' }
-            },
-            scales: {
-                y: { beginAtZero: true }
-            }
         }
     });
+
+    // Функция пересчета (Логика ползунка)
+    function updateCrisis() {
+        const drop = slider.value;
+        const factor = (100 - drop) / 100;
+        dropLabel.innerText = drop;
+
+        let currentBalance = 20000; // Начальный остаток (приблизительно)
+        let totalRevenue = 0;
+        const newBalances = [];
+
+        originalData.forEach(d => {
+            const newMev = d.r * factor;
+            totalRevenue += newMev;
+            // Убыток от падения выручки вычитаем из реального баланса
+            const impact = d.r - newMev;
+            const simulatedBal = d.b - (totalRevenue * (drop/100)); // упрощенная модель влияния
+            
+            // Находим отклонение
+            let newB = d.b - (d.r * (drop/100) * (originalData.indexOf(d)+1));
+            newBalances.push(Math.round(newB));
+        });
+
+        const finalBal = newBalances[11];
+        resRev.innerText = Math.round(totalRevenue).toLocaleString();
+        resBal.innerText = finalBal.toLocaleString();
+
+        if (finalBal < 0) {
+            resStatus.classList.add('alert');
+            resBal.innerText += " ⚠️ РАЗРЫВ";
+        } else {
+            resStatus.classList.remove('alert');
+        }
+
+        chart.data.datasets[0].data = newBalances;
+        chart.update();
+    }
+
+    slider.addEventListener('input', updateCrisis);
 </script>
 
 </body>
