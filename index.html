@@ -1,0 +1,119 @@
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CFO Dashboard - ChocoBox 2024</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; color: #333; }
+        .container { max-width: 1200px; margin: auto; }
+        .header { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 20px; }
+        .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .card h3 { margin-top: 0; color: #666; font-size: 0.9rem; text-transform: uppercase; }
+        .card .value { font-size: 1.8rem; font-weight: bold; color: #2c3e50; }
+        .card .delta { font-size: 0.9rem; color: #27ae60; }
+        .chart-container { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        .recommendations { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .risk { border-left: 5px solid #e74c3c; }
+        .growth { border-left: 5px solid #27ae60; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #eee; }
+        th { background: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Финансовый дашборд ChocoBox 2024</h1>
+        <div style="text-align: right;">
+            <strong>Статус:</strong> <span style="color: #27ae60;">Рост [cite: 31]</span><br>
+            <strong>Здоровье:</strong> Хорошее [cite: 30]
+        </div>
+    </div>
+
+    <div class="stats-grid">
+        <div class="card">
+            <h3>Выручка (Год)</h3>
+            <div class="value">66 000</div>
+            <div class="delta">↑ +83% [cite: 3, 10]</div>
+        </div>
+        <div class="card">
+            <h3>Валовая прибыль</h3>
+            <div class="value">20 880</div>
+            <div class="delta">Пик в IV кв [cite: 7, 15]</div>
+        </div>
+        <div class="card risk">
+            <h3>Мин. остаток (Август)</h3>
+            <div class="value" style="color: #e74c3c;">13 816</div>
+            <div class="delta" style="color: #e74c3c;">Точка риска [cite: 17, 18]</div>
+        </div>
+        <div class="card">
+            <h3>Cash Flow (Ноябрь)</h3>
+            <div class="value">13 224</div>
+            <div class="delta">Макс. поток [cite: 7, 22]</div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <h3>Динамика выручки и денежного баланса</h3>
+        <canvas id="businessChart"></canvas>
+    </div>
+
+    <div class="recommendations">
+        <div class="card risk">
+            <h3>Критический риск</h3>
+            <ul>
+                <li>Сильная волатильность баланса в течение года[cite: 5].</li>
+                <li>Отрицательный поток в декабре: -5 562.</li>
+                <li>Опасность кассового разрыва в августе[cite: 16].</li>
+            </ul>
+        </div>
+        <div class="card growth">
+            <h3>Драйверы роста</h3>
+            <ul>
+                <li>Сентябрь — начало сильного роста[cite: 14].</li>
+                <li>Октябрь-Декабрь — пиковые продажи[cite: 15].</li>
+                <li>Высокий потенциал масштабирования сезона[cite: 38].</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ctx = document.getElementById('businessChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'],
+            datasets: [{
+                label: 'Выручка [cite: 7]',
+                data: [36000, 36000, 42000, 42000, 48000, 48000, 48000, 48000, 54000, 66000, 66000, 66000],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                fill: true,
+                tension: 0.3
+            }, {
+                label: 'Денежный баланс [cite: 7]',
+                data: [22740, 22980, 25948, 30416, 27708, 34500, 37408, 13816, 24514, 45738, 58962, 43400],
+                borderColor: '#e67e22',
+                borderDash: [5, 5],
+                fill: false,
+                tension: 0.3
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            },
+            scales: {
+                y: { beginAtZero: true }
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
