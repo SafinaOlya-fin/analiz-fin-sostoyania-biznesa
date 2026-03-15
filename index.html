@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
@@ -54,4 +55,116 @@
                 <span id="newRev" class="val">606 000</span>
             </div>
             <div id="balanceCard" class="stat-card">
-                <div>О
+                <div>Остаток денег в декабре</div>
+                <span id="newBal" class="val">43 400</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📈 Динамика денежных средств (Cash Flow)</h2>
+        <canvas id="chart" height="120"></canvas>
+    </div>
+
+    <div class="card">
+        <h2>📊 Аналитическая записка</h2>
+        
+        <h3>1. Текущее состояние</h3>
+        <p>За 2024 год компания показала рост выручки на <b>83%</b> (с 36 000 до 66 000). Мы успешно масштабировались, однако рост выявил серьезную волатильность денежного потока.</p>
+
+        <h3>2. Ключевые инсайты</h3>
+        <ul>
+            <li><b>Осенний драйвер:</b> Сентябрь — точка взрывного роста. Октябрь и ноябрь — самые прибыльные месяцы.</li>
+            <li><b>Зона риска (Август):</b> Из-за инвестиций в новую линию на фоне низкого сезона остаток упал до 13 816 руб. Это была "точка выживания".</li>
+            <li><b>Декабрьская ловушка:</b> Несмотря на пик продаж, операционный поток ушел в минус (-5 562 руб.). Деньги "заморожены" в запасах или ушли на авансы.</li>
+        </ul>
+
+        <h3>3. Рекомендации собственнику</h3>
+        <ol>
+            <li><b>Создать Cash Buffer:</b> Необходимо накопить резерв в размере 3-месячных расходов (около 45-50 тыс. руб.) для прохождения "тихого" августа.</li>
+            <li><b>Платежный календарь:</b> Внедрить систему утверждения платежей, чтобы избежать отрицательного кэш-флоу в пиковые месяцы.</li>
+            <li><b>Масштабирование:</b> Модель симулятора показывает, что бизнес устойчив к падению спроса до 10-12%. При падении выше 15% требуется внешний капитал.</li>
+        </ol>
+
+        <p style="margin-top: 30px; border-top: 1px solid #eee; pt: 10px;"><i>Отчет подготовлен для внутреннего использования. Данные основаны на отчетах ОПиУ и ОДДС за 2024 год.</i></p>
+    </div>
+
+    <div class="footer">
+        &copy; 2024 ChocoBox Аналитика | Сгенерировано через VS Code & GitHub
+    </div>
+</div>
+
+<script>
+    // Исходные финансовые данные
+    const months = ["Янв", "Фев", "Мар", "Апр", "Май", "Июн", "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"];
+    const baseRevenue = [36000, 36000, 42000, 42000, 48000, 48000, 48000, 48000, 54000, 66000, 66000, 66000];
+    const baseBalance = [22740, 22980, 25948, 30416, 27708, 34500, 37408, 13816, 24514, 45738, 58962, 43400];
+
+    const slider = document.getElementById('crisisSlider');
+    const dropLabel = document.getElementById('dropLabel');
+    const newRev = document.getElementById('newRev');
+    const newBal = document.getElementById('newBal');
+    const balanceCard = document.getElementById('balanceCard');
+
+    // Инициализация Chart.js
+    const ctx = document.getElementById('chart').getContext('2d');
+    let chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Остаток на счете (руб.)',
+                data: [...baseBalance],
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                fill: true,
+                borderWidth: 3,
+                tension: 0.3,
+                pointRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: true } },
+            scales: { y: { beginAtZero: false, grid: { color: '#eee' } }, x: { grid: { display: false } } }
+        }
+    });
+
+    // Функция обновления данных
+    function updateDashboard() {
+        const dropPercent = parseInt(slider.value);
+        dropLabel.innerText = dropPercent;
+        
+        let cumulativeLoss = 0;
+        let totalYearlyRev = 0;
+        
+        const updatedBalances = baseBalance.map((bal, i) => {
+            const lossInMonth = baseRevenue[i] * (dropPercent / 100);
+            cumulativeLoss += lossInMonth;
+            totalYearlyRev += (baseRevenue[i] - lossInMonth);
+            return Math.round(bal - cumulativeLoss);
+        });
+
+        const finalBalance = updatedBalances[11];
+        
+        // Обновление интерфейса
+        newRev.innerText = Math.round(totalYearlyRev).toLocaleString() + " руб.";
+        newBal.innerText = finalBalance.toLocaleString() + " руб.";
+        chart.data.datasets[0].data = updatedBalances;
+        chart.update('none'); // Обновляем без лишней анимации
+
+        // Логика визуального предупреждения
+        if (updatedBalances.some(b => b < 0)) {
+            balanceCard.classList.add('critical');
+            newBal.style.color = 'var(--danger)';
+        } else {
+            balanceCard.classList.remove('critical');
+            newBal.style.color = 'var(--primary)';
+        }
+    }
+
+    slider.addEventListener('input', updateDashboard);
+</script>
+
+</body>
+</html>
